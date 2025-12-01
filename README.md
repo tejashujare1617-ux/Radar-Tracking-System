@@ -1,146 +1,155 @@
 
 # Arduino Radar Tracking System
 
-A simple **Arduino-based Radar Tracking System** using a **Servo Motor**, **Ultrasonic Sensor (HC-SR04)**, and **Arduino Uno**.  
-The servo sweeps 0–180° while the ultrasonic sensor measures distance and plots objects on a radar-style display.
+This project is a complete radar-style distance detection system built using an Arduino Uno, HC-SR04 Ultrasonic Sensor, SG90 Servo Motor, and a Processing-based GUI. The servo sweeps across a defined angle range while the ultrasonic sensor measures distance at each step. The readings are then visualized in real time on a radar interface created using the Processing IDE.
 
 ---
 
-## 📸 Circuit Connection Diagram (Reference Images)
+## Project Overview
 
-### **Ultrasonic Sensor (HC-SR04) Connections**
-![SONAR](sonar.png)
-
-| Pin | Arduino Pin |
-|-----|-------------|
-| **VCC** | 5V |
-| **GND** | GND |
-| **Trig** | Pin 10 |
-| **Echo** | Pin 11 |
+The radar system works by continuously rotating a servo motor from 15° to 165° and back. At each degree, the ultrasonic sensor measures the distance to any obstacles in front of it. The Arduino sends angle and distance data to the computer through serial communication. The Processing sketch reads this data and displays it on a radar screen similar to traditional scanning radars.
 
 ---
 
-### **Servo Motor (SG90) Connections**
-![SERVO](servo.png)
-
-| Servo Wire | Arduino Pin |
-|------------|-------------|
-| **Red**        | 5V |
-| **Black/Brown**| GND |
-| **Yellow/Orange** | Pin 12 |
-
----
-
-## 🧰 Required Components
+## Components Used
 
 - Arduino Uno  
-- SG90 Servo Motor  
 - HC-SR04 Ultrasonic Sensor  
-- Breadboard  
+- SG90 Servo Motor  
 - Jumper Wires  
+- Breadboard (optional)  
 - USB Cable  
+- Processing IDE (for visualization)
 
 ---
 
-## ⚡ Circuit Summary
+## Hardware Connections
 
-- The **Servo** rotates from **0° to 180°** and back.
-- The **Ultrasonic Sensor** measures object distance at each angle.
-- Data is sent to Serial Monitor or radar GUI.
+### Ultrasonic Sensor (HC-SR04)
+- VCC → Arduino 5V  
+- GND → Arduino GND  
+- Trig → Arduino Pin 10  
+- Echo → Arduino Pin 11  
 
----
-
-## 🧠 Working Principle
-
-1. Servo rotates from 0° → 180° in steps.
-2. At each angle, ultrasonic sensor sends a pulse and measures return_echo.
-3. Distance is calculated using speed of sound formula:
-   ```
-   distance = (duration × 0.034) / 2
-   ```
-4. Arduino outputs angle + distance values.
+### Servo Motor (SG90)
+- Red → 5V  
+- Brown/Black → GND  
+- Yellow/Orange → Arduino Pin 12  
 
 ---
 
-## 🧾 Arduino Code Example
+## How the System Works
 
-```cpp
-#include <Servo.h>
-
-Servo myservo;
-
-const int trigPin = 10;
-const int echoPin = 11;
-long duration;
-int distance;
-
-void setup() {
-  Serial.begin(9600);
-  myservo.attach(12);
-
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
-}
-
-void loop() {
-  for (int angle = 0; angle <= 180; angle++) {
-    myservo.write(angle);
-    distance = getDistance();
-    Serial.print(angle);
-    Serial.print(",");
-    Serial.println(distance);
-    delay(50);
-  }
-
-  for (int angle = 180; angle >= 0; angle--) {
-    myservo.write(angle);
-    distance = getDistance();
-    Serial.print(angle);
-    Serial.print(",");
-    Serial.println(distance);
-    delay(50);
-  }
-}
-
-int getDistance() {
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-
-  duration = pulseIn(echoPin, HIGH);
-  int dist = duration * 0.034 / 2;
-  return dist;
-}
-```
+1. The servo rotates from 15° to 165°, then reverses back.  
+2. At each angle step, the ultrasonic sensor:
+   - Sends an ultrasonic pulse.
+   - Measures the time taken for the echo to return.
+   - Calculates the distance based on sound speed.
+3. Arduino sends data to the serial port in the format:  
+   angle,distance.
+4. Processing reads this serial data, parses angle and distance, and plots:
+   - Sweep line  
+   - Objects detected (within range)  
+   - Angle labels  
+   - Range markings (10 cm, 20 cm, 30 cm, 40 cm)
 
 ---
 
-## 🧩 Folder Structure
+## Software Required
 
-```
-Radar-Tracking-System/
-│-- README.md
-│-- radar.ino
-│-- images/
-    │-- sonar.png
-    │-- servo.png
-```
+- Arduino IDE  
+- Processing IDE  
 
 ---
 
-## ✔ Future Improvements
+## Serial Data Format
 
-- Add OLED/LCD screen  
-- Add buzzer for alerts  
-- Add Bluetooth/WiFi  
-- Create 3D printed rotating base  
+The Arduino continuously sends values formatted as:
+
+angle,distance.
+
+Example:
+
+45,23.  
+46,24.  
+47,21.  
+
+- angle = current servo position  
+- distance = measured distance from ultrasonic sensor (in cm)  
+- '.' indicates packet end
 
 ---
 
-## 👨‍💻 Author
+## Project Structure
 
-**Tejas – Arduino Radar Tracking System**
+arduino-radar-tracking-system/  
+│  
+├── Arduino/  
+│   └── radar.ino  
+│  
+├── Processing/  
+│   └── radar_visualizer.pde  
+│  
+└── README.md  
 
+---
+
+## How to Run the Project
+
+### 1. Upload Arduino Code
+- Open Arduino IDE  
+- Select Arduino Uno  
+- Select correct COM port  
+- Upload radar.ino  
+
+### 2. Run Processing Radar Interface
+- Open Processing IDE  
+- Load radar_visualizer.pde  
+- Update COM port string  
+- Run the sketch  
+
+### 3. View Radar Output  
+A sweeping radar line appears, detecting objects in real time.
+
+---
+
+## Testing Tips
+
+- Test with no obstacles first.  
+- Place objects at various distances (10–40 cm).  
+- Ensure smooth servo movement.  
+- Keep ultrasonic sensor unobstructed.
+
+---
+
+## Common Issues & Fixes
+
+### Servo not moving
+- Incorrect wiring  
+- Low voltage  
+- Loose wires  
+
+### Always shows "Out of Range"
+- Wrong trig/echo wiring  
+- Sensor damaged  
+- Object too far  
+
+### Processing window blank
+- Wrong COM port  
+- Serial port busy  
+
+---
+
+## Future Enhancements
+
+- Add buzzer alert  
+- Add OLED/LCD display  
+- Add WiFi/Bluetooth  
+- Use a 360° servo  
+- Add 3D printed base  
+
+---
+
+## Author
+Created by Tejas  
+Arduino Radar Tracking System
