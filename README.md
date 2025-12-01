@@ -150,6 +150,4 @@ A sweeping radar line appears, detecting objects in real time.
 
 ---
 
-## Author
-Created by Tejas  
-Arduino Radar Tracking System
+
