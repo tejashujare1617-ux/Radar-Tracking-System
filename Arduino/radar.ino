@@ -1,48 +1,62 @@
 #include <Servo.h>
 
-const int TRIG = 9;
-const int ECHO = 8;
-const int SERVO_PIN = 3; //Change With your own pin
+// Ultrasonic Pins
+const int trigPin = 10;
+const int echoPin = 11;
 
-float duration_us, distance_cm;
+long duration;
+int distance;
+
 Servo myServo;
 
 void setup() {
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  
   Serial.begin(9600);
-  pinMode(TRIG, OUTPUT);
-  pinMode(ECHO, INPUT);
-  myServo.attach(SERVO_PIN);
+  myServo.attach(12);
 }
 
 void loop() {
-  // Sweep forward
-  for (int angle = 0; angle <= 180; angle++) {
-    myServo.write(angle);
-    delay(5);
-    distance_cm = getDistance();
-    Serial.print(angle);
+
+  // Scan Left → Right (slow)
+  for (int i = 15; i <= 165; i += 2) {
+    myServo.write(i);
+    delay(40);      // slower movement
+
+    distance = calculateDistance();
+
+    Serial.print(i);
     Serial.print(",");
-    Serial.println(distance_cm);
+    Serial.print(distance);
+    Serial.print(".");
   }
 
-  // Sweep backward
-  for (int angle = 180; angle >= 0; angle--) {
-    myServo.write(angle);
-    delay(5);
-    distance_cm = getDistance();
-    Serial.print(angle);
+  // Scan Right → Left (slow)
+  for (int i = 165; i >= 15; i -= 2) {
+    myServo.write(i);
+    delay(40);      // slower movement
+
+    distance = calculateDistance();
+
+    Serial.print(i);
     Serial.print(",");
-    Serial.println(distance_cm);
+    Serial.print(distance);
+    Serial.print(".");
   }
 }
 
-float getDistance() {
-  digitalWrite(TRIG, LOW);
-  delayMicroseconds(2);
-  digitalWrite(TRIG, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(TRIG, LOW);
+int calculateDistance() {
 
-  duration_us = pulseIn(ECHO, HIGH);
-  return (0.017 * duration_us); // cm
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  duration = pulseIn(echoPin, HIGH, 20000);
+
+  distance = duration * 0.034 / 2;
+  return distance;
 }
